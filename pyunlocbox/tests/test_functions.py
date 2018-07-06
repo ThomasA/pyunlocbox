@@ -87,6 +87,14 @@ class TestCase(unittest.TestCase):
         self.assertEqual(f.eval(x), 0)
         nptest.assert_array_equal(f.grad(x), np.zeros(len(x)))
         nptest.assert_array_equal(f.prox(x, 1), x)
+        # Repeat checks with complex numbers as well
+        self.assertEqual(f.eval(34 + 1j), 0)
+        nptest.assert_array_equal(f.grad(34 + 1j), [0])
+        nptest.assert_array_equal(f.prox(34 + 1j, 1), [34 + 1j])
+        x = [34j, 2, 1.0, -10.2j]
+        self.assertEqual(f.eval(x), 0)
+        nptest.assert_array_equal(f.grad(x), np.zeros(len(x)))
+        nptest.assert_array_equal(f.prox(x, 1), x)
 
     def test_norm_l2(self):
         """
@@ -96,38 +104,38 @@ class TestCase(unittest.TestCase):
 
         """
         f = functions.norm_l2(lambda_=3)
-        self.assertEqual(f.eval([10, 0]), 300)
-        self.assertEqual(f.eval(np.array([-10, 0])), 300)
-        nptest.assert_allclose(f.grad([10, 0]), [60, 0])
-        nptest.assert_allclose(f.grad([-10, 0]), [-60, 0])
-        self.assertEqual(f.eval([3, 4]), 3 * 5**2)
-        self.assertEqual(f.eval(np.array([-3, 4])), 3 * 5**2)
-        nptest.assert_allclose(f.grad([3, 4]), [18, 24])
-        nptest.assert_allclose(f.grad([3, -4]), [18, -24])
-        self.assertEqual(f.prox(0, 1), 0)
-        self.assertEqual(f.prox(7, 1. / 6), 3.5)
+        self.assertEqual(f.eval([10, 1j]), 303)
+        self.assertEqual(f.eval(np.array([-10, -1j])), 303)
+        nptest.assert_allclose(f.grad([10, 1j]), [60, 6j])
+        nptest.assert_allclose(f.grad([-10, -1j]), [-60, -6j])
+        self.assertEqual(f.eval([3, 4j]), 3 * 5**2)
+        self.assertEqual(f.eval(np.array([-3, 4j])), 3 * 5**2)
+        nptest.assert_allclose(f.grad([3, 4j]), [18, 24j])
+        nptest.assert_allclose(f.grad([3, -4j]), [18, -24j])
+        self.assertEqual(f.prox(0, 1 + 1j), 0)
+        self.assertEqual(f.prox(7 + 1j, 1. / 6), 3.5 + .5j)
         f = functions.norm_l2(lambda_=4)
-        nptest.assert_allclose(f.prox([7, -22], .125), [3.5, -11])
+        nptest.assert_allclose(f.prox([7, -22j], .125), [3.5, -11j])
 
         f = functions.norm_l2(lambda_=1, A=lambda x: 2 * x, At=lambda x: x / 2,
-                              y=[8, 12])
-        self.assertEqual(f.eval([4, 6]), 0)
-        self.assertEqual(f.eval([5, -2]), 256 + 4)
-        nptest.assert_allclose(f.grad([4, 6]), 0)
+                              y=[8j, 12])
+        self.assertEqual(f.eval([4j, 6]), 0)
+        self.assertEqual(f.eval([5j, -2]), 256 + 4)
+        nptest.assert_allclose(f.grad([4j, 6]), 0)
 #        nptest.assert_allclose(f.grad([5, -2]), [8, -64])
-        nptest.assert_allclose(f.prox([4, 6], 1), [4, 6])
+        nptest.assert_allclose(f.prox([4j, 6], 1), [4j, 6])
 
-        f = functions.norm_l2(lambda_=2, y=np.fft.fft([2, 4]) / np.sqrt(2),
+        f = functions.norm_l2(lambda_=2, y=np.fft.fft([2j, 4]) / np.sqrt(2),
                               A=lambda x: np.fft.fft(x) / np.sqrt(x.size),
                               At=lambda x: np.fft.ifft(x) * np.sqrt(x.size))
 #        self.assertEqual(f.eval(np.fft.ifft([2, 4])*np.sqrt(2)), 0)
 #        self.assertEqual(f.eval([3, 5]), 2*np.sqrt(25+81))
-        nptest.assert_allclose(f.grad([2, 4]), 0)
+        nptest.assert_allclose(f.grad([2j, 4]), 0)
 #        nptest.assert_allclose(f.grad([3, 5]), [4*np.sqrt(5), 4*3])
-        nptest.assert_allclose(f.prox([2, 4], 1), [2, 4])
-        nptest.assert_allclose(f.prox([3, 5], 1), [2.2, 4.2])
-        nptest.assert_allclose(f.prox([2.2, 4.2], 1), [2.04, 4.04])
-        nptest.assert_allclose(f.prox([2.04, 4.04], 1), [2.008, 4.008])
+        nptest.assert_allclose(f.prox([2j, 4], 1), [2j, 4])
+        nptest.assert_allclose(f.prox([3j, 5], 1), [2.2j, 4.2])
+        nptest.assert_allclose(f.prox([2.2j, 4.2], 1), [2.04j, 4.04])
+        nptest.assert_allclose(f.prox([2.04j, 4.04], 1), [2.008j, 4.008])
 
         # Test prox for non-tight matrices A
         L = np.array([[8, 1, 10], [1, 9, 1], [3, 7, 5], [1, 4, 4]])
@@ -142,6 +150,16 @@ class TestCase(unittest.TestCase):
                                [-0.345,  0.298,  0.388], rtol=1e-3)
         nptest.assert_allclose(f.prox([10, 0, -5], 1),
                                [1.103,  0.319,  -0.732], rtol=1e-3)
+        # Test the complex case as well
+        L = np.array([[8, 1j, 10], [1, 9, 1 + 2j], [3 - 1j, 7, 5],
+                      [1, 4 - 3j, 4]])
+        f = functions.norm_l2(A=L, tight=False, y=np.array([1, 2j, 3, 4j]),
+                              w=np.array([1, 1, 0.5, 0.75]))
+        nptest.assert_allclose(f.eval([1, 1, 1]), 520.375)
+        nptest.assert_allclose(f.grad([1, 1, 1]), [322.625 + 12.625j,
+                                                   306.125 - 38.625j,
+                                                   432.5 - 58.j],
+                               rtol=1e-3)
 
     def test_soft_thresholding(self):
         """
