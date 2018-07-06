@@ -501,6 +501,10 @@ class norm_l2(norm):
         if self.tight:
             sol = x + 2. * gamma * self.At(self.y() * self.w**2)
             sol /= 1. + 2. * gamma * self.nu * self.w**2
+        elif (np.iscomplexobj(x) or np.iscomplexobj(self.y())
+              or np.iscomplexobj(self.A(x))):
+            raise NotImplementedError('Matrix must be tight for complex '
+                                      + 'numbers.')
         else:
             res = minimize(fun=lambda z: 0.5 * np.sum(np.abs(z - x)**2)
                            + gamma * np.sum((self.w * np.abs(self.A(z)

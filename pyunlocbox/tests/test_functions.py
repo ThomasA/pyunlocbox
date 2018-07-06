@@ -160,6 +160,8 @@ class TestCase(unittest.TestCase):
                                                    306.125 - 38.625j,
                                                    432.5 - 58.j],
                                rtol=1e-3)
+        with self.assertRaises(NotImplementedError):
+            f.prox([10, 0, -5], 1)
 
     def test_soft_thresholding(self):
         """
