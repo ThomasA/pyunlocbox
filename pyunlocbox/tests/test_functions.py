@@ -165,6 +165,8 @@ class TestCase(unittest.TestCase):
         nptest.assert_allclose(f.prox([10, 0, -5], 1),
                                [1.103,  0.319,  -0.732], rtol=1e-3)
         # Test the complex case as well
+        nptest.assert_allclose(f.prox([1 + 0j, 1 + 0j, 1 + 0j], 1),
+                               [-0.887,  0.252,  0.798], rtol=1e-3)
         L = np.array([[8, 1j, 10], [1, 9, 1 + 2j], [3 - 1j, 7, 5],
                       [1, 4 - 3j, 4]])
         f = functions.norm_l2(A=L, tight=False, y=np.array([1, 2j, 3, 4j]),
@@ -174,8 +176,6 @@ class TestCase(unittest.TestCase):
                                                    306.125 - 38.625j,
                                                    432.5 - 58.j],
                                rtol=1e-3)
-        with self.assertRaises(NotImplementedError):
-            f.prox([10, 0, -5], 1)
 
     def test_soft_thresholding(self):
         """

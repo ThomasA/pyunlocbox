@@ -512,8 +512,21 @@ class norm_l2(norm):
             sol /= 1. + 2. * gamma * self.nu * self.w**2
         elif (np.iscomplexobj(x) or np.iscomplexobj(self.y())
               or np.iscomplexobj(self.A(x))):
-            raise NotImplementedError('Matrix must be tight for complex '
-                                      + 'numbers.')
+            res = minimize(fun=lambda z: 0.5 *
+                               np.sum(np.abs(_real_to_complex(z) - x)**2)
+                               + gamma * np.sum((self.w *
+                                   np.abs(self.A(_real_to_complex(z)) 
+                                   - self.y()))**2),
+                           x0=_complex_to_real(x),
+                           method='BFGS',
+                           jac=lambda z: _complex_to_real(
+                               _real_to_complex(z) - x +
+                               2. * gamma * self.At((self.w**2) *
+                               (self.A(_real_to_complex(z)) - self.y()))))
+            if res.success:
+                sol = _real_to_complex(res.x)
+            else:
+                raise RuntimeError('norm_l2.prox: ' + res.message)
         else:
             res = minimize(fun=lambda z: 0.5 * np.sum(np.abs(z - x)**2)
                            + gamma * np.sum((self.w * np.abs(self.A(z)
