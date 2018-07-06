@@ -207,8 +207,17 @@ class TestCase(unittest.TestCase):
         self.assertEqual(f.eval([10, 0]), 30)
         self.assertEqual(f.eval(np.array([-10, 0])), 30)
         self.assertEqual(f.eval([-3, 4]), 21)
+
         nptest.assert_array_equal(f.prox(np.array([[1, -4], [5, -2]]), 1),
                                   [[0, -1], [2, 0]])
+
+        # Test with complex numbers
+        self.assertEqual(f.eval([0, 10j]), 30)
+        self.assertEqual(f.eval(np.array([0, -10j])), 30)
+        self.assertEqual(f.eval([-3, 4j]), 21)
+
+        nptest.assert_array_equal(f.prox(np.array([[2 + 1j, -3j], [5j, 1 - 1j]]), 1),
+                                  [[0, 0], [2j, 0]])
 
         f = functions.norm_l1(tight=False)
         x = np.ones((4,))
@@ -228,6 +237,12 @@ class TestCase(unittest.TestCase):
         self.assertEqual(f.eval([[-3]]), 9)
         nptest.assert_allclose(f.prox(np.array([[1, 1], [1, 1]]), 1. / 3),
                                [[.5, .5], [.5, .5]])
+        # Test with complex numbers
+        self.assertEqual(f.eval(np.diag([0, 10j])), 30)
+        self.assertEqual(f.eval(np.diag(np.array([0, -10j]))), 30)
+        self.assertEqual(f.eval([[-3j]]), 9)
+        nptest.assert_allclose(f.prox(np.array([[1j, 1j], [1j, 1j]]), 1. / 3),
+                               [[.5j, .5j], [.5j, .5j]])
 
     def test_norm_tv(self):
         """
