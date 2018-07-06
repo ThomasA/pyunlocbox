@@ -118,6 +118,15 @@ def _prox_star(func, z, T):
     return z - T * func.prox(z / T, 1 / T)
 
 
+def _complex_to_real(complex_array):
+    return np.concatenate((np.real(complex_array),
+                           np.imag(complex_array)), axis=0)
+
+
+def _real_to_complex(real_array):
+    return (real_array[:real_array.shape[0]//2]
+            + 1j * real_array[real_array.shape[0]//2:])
+
 class func(object):
     r"""
     This class defines the function object interface.

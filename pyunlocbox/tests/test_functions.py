@@ -96,6 +96,20 @@ class TestCase(unittest.TestCase):
         nptest.assert_array_equal(f.grad(x), np.zeros(len(x)))
         nptest.assert_array_equal(f.prox(x, 1), x)
 
+    def test_complex_to_real(self):
+        """
+        Test the auxiliary functions
+        :func:`pyunlocbox.functions._complex_to_real` and
+        :func:`pyunlocbox.functions._real_to_complex`.
+
+        """
+        x = np.array([1 + 1j, 2 + 2j])
+        y = np.array([1, 2, 1, 2])
+        nptest.assert_array_equal(functions._complex_to_real(x), y)
+        nptest.assert_array_equal(functions._real_to_complex(y), x)
+        nptest.assert_array_equal(functions._real_to_complex(
+            functions._complex_to_real(x)), x)
+
     def test_norm_l2(self):
         """
         Test the norm_l2 derived class.
